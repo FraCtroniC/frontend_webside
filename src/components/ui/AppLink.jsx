@@ -1,0 +1,32 @@
+export default function AppLink({
+  href,
+  children,
+  className = '',
+  external = false,
+  ...rest
+}) {
+  if (external) {
+    return (
+      <a href={href} className={className} target="_blank" rel="noreferrer" {...rest}>
+        {children}
+      </a>
+    )
+  }
+
+  const handleClick = (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return
+    }
+
+    event.preventDefault()
+    window.history.pushState({}, '', href)
+    window.dispatchEvent(new Event('site:navigate'))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  return (
+    <a href={href} className={className} onClick={handleClick} {...rest}>
+      {children}
+    </a>
+  )
+}
