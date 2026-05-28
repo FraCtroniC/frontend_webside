@@ -542,6 +542,7 @@ export default function Admissions() {
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState(null)
   const [submission, setSubmission] = useState(null)
+  const [isPreregistrationOpen, setIsPreregistrationOpen] = useState(false)
 
   const handleInputChange = (event) => {
     const { name, type, value, checked } = event.target
@@ -571,6 +572,10 @@ export default function Admissions() {
     setErrors({})
     setStatus(null)
     setSubmission(null)
+  }
+
+  const togglePreregistration = () => {
+    setIsPreregistrationOpen((current) => !current)
   }
 
   const handleSubmit = (event) => {
@@ -659,374 +664,397 @@ export default function Admissions() {
             </article>
           </div>
 
-          <form className="card form-shell fade-in" onSubmit={handleSubmit} onReset={handleReset} noValidate>
-            <div className="form-intro">
-              <span className="badge">Preinscripcion en linea</span>
-              <h2>Formulario de preregistro</h2>
-              <p>
-                Completa este formulario con informacion exacta. Cada campo esta validado
-                para reducir errores comunes en el proceso de admision.
-              </p>
+          <section className="preregistration-wrap fade-in">
+            <div className="preregistration-header card">
+              <div className="form-intro">
+                <span className="badge">Preinscripcion en linea</span>
+                <h2>Formulario de preregistro</h2>
+                <p>
+                  Completa este formulario con informacion exacta. Cada campo esta validado
+                  para reducir errores comunes en el proceso de admision.
+                </p>
+              </div>
+
+              <button
+                className="btn btn-primary preregistration-toggle"
+                type="button"
+                onClick={togglePreregistration}
+                aria-expanded={isPreregistrationOpen}
+                aria-controls="preregistration-panel"
+              >
+                {isPreregistrationOpen ? 'Ocultar preregistro' : 'Abrir preregistro'}
+              </button>
             </div>
 
-            {status ? <div className={`status-banner status-banner--${status.type}`}>{status.message}</div> : null}
+            {isPreregistrationOpen ? (
+              <form id="preregistration-panel" className="card form-shell fade-in" onSubmit={handleSubmit} onReset={handleReset} noValidate>
+                {status ? <div className={`status-banner status-banner--${status.type}`}>{status.message}</div> : null}
 
-            <section className="form-section">
-              <h3>Datos personales</h3>
-              <div className="form-grid">
-                <TextField
-                  label="Primer nombre"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  error={errors.firstName}
-                  required
-                  autoComplete="given-name"
-                  placeholder="Ej. Maria"
-                  maxLength={40}
-                />
-                <TextField
-                  label="Segundo nombre"
-                  name="middleName"
-                  value={formData.middleName}
-                  onChange={handleInputChange}
-                  error={errors.middleName}
-                  autoComplete="additional-name"
-                  placeholder="Opcional"
-                  maxLength={40}
-                />
-                <TextField
-                  label="Primer apellido"
-                  name="firstSurname"
-                  value={formData.firstSurname}
-                  onChange={handleInputChange}
-                  error={errors.firstSurname}
-                  required
-                  autoComplete="family-name"
-                  placeholder="Ej. Perez"
-                  maxLength={40}
-                />
-                <TextField
-                  label="Segundo apellido"
-                  name="secondSurname"
-                  value={formData.secondSurname}
-                  onChange={handleInputChange}
-                  error={errors.secondSurname}
-                  autoComplete="family-name"
-                  placeholder="Opcional"
-                  maxLength={40}
-                />
-                <SelectField
-                  label="Nacionalidad"
-                  name="nationality"
-                  value={formData.nationality}
-                  onChange={handleInputChange}
-                  error={errors.nationality}
-                  options={nationalityOptions.map((value) => ({ value, label: value }))}
-                  placeholder="Selecciona la nacionalidad"
-                  required
-                />
-                <div className="field field--split">
-                  <label className="field" htmlFor={getFieldId('idType')}>
-                    <span className="field-label">
-                      Tipo de documento
-                      <span className="field-required" aria-hidden="true">*</span>
-                    </span>
-                    <select
-                      id={getFieldId('idType')}
-                      name="idType"
-                      value={formData.idType}
+                <section className="form-section">
+                  <h3>Datos personales</h3>
+                  <div className="form-grid">
+                    <TextField
+                      label="Primer nombre"
+                      name="firstName"
+                      value={formData.firstName}
                       onChange={handleInputChange}
-                      aria-invalid={Boolean(errors.idType)}
-                    >
-                      <option value="V">V</option>
-                      <option value="E">E</option>
-                      <option value="P">P</option>
-                    </select>
-                    {errors.idType ? (
-                      <small className="field-error" role="alert">
-                        {errors.idType}
-                      </small>
-                    ) : null}
-                  </label>
-                  <TextField
-                    label="Numero de documento"
-                    name="idNumber"
-                    value={formData.idNumber}
-                    onChange={handleInputChange}
-                    error={errors.idNumber}
-                    required
-                    inputMode="numeric"
-                    placeholder="Solo digitos"
-                    maxLength={10}
-                  />
+                      error={errors.firstName}
+                      required
+                      autoComplete="given-name"
+                      placeholder="Ej. Maria"
+                      maxLength={40}
+                    />
+                    <TextField
+                      label="Segundo nombre"
+                      name="middleName"
+                      value={formData.middleName}
+                      onChange={handleInputChange}
+                      error={errors.middleName}
+                      autoComplete="additional-name"
+                      placeholder="Opcional"
+                      maxLength={40}
+                    />
+                    <TextField
+                      label="Primer apellido"
+                      name="firstSurname"
+                      value={formData.firstSurname}
+                      onChange={handleInputChange}
+                      error={errors.firstSurname}
+                      required
+                      autoComplete="family-name"
+                      placeholder="Ej. Perez"
+                      maxLength={40}
+                    />
+                    <TextField
+                      label="Segundo apellido"
+                      name="secondSurname"
+                      value={formData.secondSurname}
+                      onChange={handleInputChange}
+                      error={errors.secondSurname}
+                      autoComplete="family-name"
+                      placeholder="Opcional"
+                      maxLength={40}
+                    />
+                    <SelectField
+                      label="Nacionalidad"
+                      name="nationality"
+                      value={formData.nationality}
+                      onChange={handleInputChange}
+                      error={errors.nationality}
+                      options={nationalityOptions.map((value) => ({ value, label: value }))}
+                      placeholder="Selecciona la nacionalidad"
+                      required
+                    />
+                    <div className="field field--split">
+                      <label className="field" htmlFor={getFieldId('idType')}>
+                        <span className="field-label">
+                          Tipo de documento
+                          <span className="field-required" aria-hidden="true">*</span>
+                        </span>
+                        <select
+                          id={getFieldId('idType')}
+                          name="idType"
+                          value={formData.idType}
+                          onChange={handleInputChange}
+                          aria-invalid={Boolean(errors.idType)}
+                        >
+                          <option value="V">V</option>
+                          <option value="E">E</option>
+                          <option value="P">P</option>
+                        </select>
+                        {errors.idType ? (
+                          <small className="field-error" role="alert">
+                            {errors.idType}
+                          </small>
+                        ) : null}
+                      </label>
+                      <TextField
+                        label="Numero de documento"
+                        name="idNumber"
+                        value={formData.idNumber}
+                        onChange={handleInputChange}
+                        error={errors.idNumber}
+                        required
+                        inputMode="numeric"
+                        placeholder="Solo digitos"
+                        maxLength={10}
+                      />
+                    </div>
+                    <TextField
+                      label="Fecha de nacimiento"
+                      name="birthDate"
+                      value={formData.birthDate}
+                      onChange={handleInputChange}
+                      error={errors.birthDate}
+                      required
+                      type="date"
+                    />
+                    <TextField
+                      label="Correo electronico"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      error={errors.email}
+                      required
+                      type="email"
+                      autoComplete="email"
+                      placeholder="nombre@correo.com"
+                      maxLength={120}
+                    />
+                    <TextField
+                      label="Telefono principal"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      error={errors.phone}
+                      required
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      placeholder="0412xxxxxxx"
+                      maxLength={11}
+                    />
+                  </div>
+                </section>
+
+                <section className="form-section">
+                  <h3>Residencia y contacto</h3>
+                  <div className="form-grid">
+                    <SelectField
+                      label="Estado"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      error={errors.state}
+                      options={stateOptions.map((value) => ({ value, label: value }))}
+                      placeholder="Selecciona el estado"
+                      required
+                    />
+                    <TextField
+                      label="Municipio"
+                      name="municipality"
+                      value={formData.municipality}
+                      onChange={handleInputChange}
+                      error={errors.municipality}
+                      required
+                      autoComplete="address-level2"
+                      placeholder="Municipio de residencia"
+                      maxLength={60}
+                    />
+                    <TextField
+                      label="Parroquia o sector"
+                      name="parish"
+                      value={formData.parish}
+                      onChange={handleInputChange}
+                      error={errors.parish}
+                      required
+                      autoComplete="address-level3"
+                      placeholder="Parroquia o sector"
+                      maxLength={60}
+                    />
+                    <TextField
+                      label="Direccion completa"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      error={errors.address}
+                      required
+                      autoComplete="street-address"
+                      placeholder="Calle, casa, referencia, urbanizacion"
+                      maxLength={160}
+                    />
+                  </div>
+                </section>
+
+                <section className="form-section">
+                  <h3>Perfil academico</h3>
+                  <div className="form-grid">
+                    <SelectField
+                      label="Modalidad de ingreso"
+                      name="admissionModality"
+                      value={formData.admissionModality}
+                      onChange={handleInputChange}
+                      error={errors.admissionModality}
+                      options={admissionOptions}
+                      placeholder="Selecciona la modalidad"
+                      required
+                      helpText="La modalidad define documentos adicionales y el flujo de revision."
+                    />
+                    <SelectField
+                      label="Area academica de interes"
+                      name="careerArea"
+                      value={formData.careerArea}
+                      onChange={handleInputChange}
+                      error={errors.careerArea}
+                      options={careerAreaOptions}
+                      placeholder="Selecciona el area"
+                      required
+                    />
+                    <TextField
+                      label="Programa o PNF solicitado"
+                      name="pnfProgram"
+                      value={formData.pnfProgram}
+                      onChange={handleInputChange}
+                      error={errors.pnfProgram}
+                      required
+                      placeholder="Ej. Informatica, Enfermeria, Administracion"
+                      maxLength={80}
+                    />
+                    <TextField
+                      label="Institucion de procedencia"
+                      name="highSchoolName"
+                      value={formData.highSchoolName}
+                      onChange={handleInputChange}
+                      error={errors.highSchoolName}
+                      required
+                      placeholder="Nombre del liceo o escuela tecnica"
+                      maxLength={100}
+                    />
+                    <SelectField
+                      label="Tipo de institucion"
+                      name="highSchoolType"
+                      value={formData.highSchoolType}
+                      onChange={handleInputChange}
+                      error={errors.highSchoolType}
+                      options={highSchoolTypeOptions}
+                      placeholder="Selecciona el tipo"
+                      required
+                    />
+                    <TextField
+                      label="Ano de egreso"
+                      name="graduationYear"
+                      value={formData.graduationYear}
+                      onChange={handleInputChange}
+                      error={errors.graduationYear}
+                      required
+                      inputMode="numeric"
+                      placeholder={`${currentYear}`}
+                      maxLength={4}
+                    />
+                    <TextareaField
+                      label="Observaciones"
+                      name="observations"
+                      value={formData.observations}
+                      onChange={handleInputChange}
+                      error={errors.observations}
+                      helpText="Aporta informacion relevante: beca, discapacidad, traslado, equivalencia u otra situacion."
+                      placeholder="Escribe aqui cualquier observacion adicional..."
+                      maxLength={500}
+                    />
+                  </div>
+                </section>
+
+                <section className="form-section">
+                  <h3>Carga de documentos</h3>
+                  <p className="field-help">
+                    Sube archivos legibles en PDF, JPG o PNG. Se aplican validaciones de peso,
+                    formato y obligatoriedad segun la modalidad.
+                  </p>
+                  <div className="file-grid">
+                    {documentFields.map((field) => (
+                      <FileField
+                        key={field.key}
+                        label={field.label}
+                        name={field.key}
+                        files={fileData[field.key]}
+                        onChange={handleFileChange}
+                        error={errors[field.key]}
+                        helpText={field.helpText}
+                        required={field.required || (field.key === 'opsuProof' && formData.admissionModality === 'opsu')}
+                        multiple={field.multiple}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                <section className="form-section">
+                  <h3>Declaracion del aspirante</h3>
+                  <div className="stack">
+                    <CheckboxField
+                      label="Confirmo que la informacion suministrada es verdadera y verificable."
+                      name="agreeAccuracy"
+                      checked={formData.agreeAccuracy}
+                      onChange={handleInputChange}
+                      error={errors.agreeAccuracy}
+                      required
+                    />
+                    <CheckboxField
+                      label="Autorizo el uso de mis datos para fines academicos y administrativos del proceso de admision."
+                      name="agreeDataUse"
+                      checked={formData.agreeDataUse}
+                      onChange={handleInputChange}
+                      error={errors.agreeDataUse}
+                      helpText="Sin esta autorizacion no es posible avanzar con el preregistro."
+                      required
+                    />
+                  </div>
+                </section>
+
+                <div className="form-actions">
+                  <button className="btn btn-primary" type="submit">
+                    Validar preregistro
+                  </button>
+                  <button className="btn btn-secondary" type="reset">
+                    Limpiar formulario
+                  </button>
                 </div>
-                <TextField
-                  label="Fecha de nacimiento"
-                  name="birthDate"
-                  value={formData.birthDate}
-                  onChange={handleInputChange}
-                  error={errors.birthDate}
-                  required
-                  type="date"
-                />
-                <TextField
-                  label="Correo electronico"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  error={errors.email}
-                  required
-                  type="email"
-                  autoComplete="email"
-                  placeholder="nombre@correo.com"
-                  maxLength={120}
-                />
-                <TextField
-                  label="Telefono principal"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  error={errors.phone}
-                  required
-                  inputMode="numeric"
-                  autoComplete="tel"
-                  placeholder="0412xxxxxxx"
-                  maxLength={11}
-                />
+
+                {submission ? (
+                  <aside className="submission-summary" aria-live="polite">
+                    <h3>Resumen local del preregistro</h3>
+                    <dl>
+                      <div>
+                        <dt>Aspirante</dt>
+                        <dd>{submission.aspirantName}</dd>
+                      </div>
+                      <div>
+                        <dt>Documento</dt>
+                        <dd>{submission.documentId}</dd>
+                      </div>
+                      <div>
+                        <dt>Modalidad</dt>
+                        <dd>{submission.modality}</dd>
+                      </div>
+                      <div>
+                        <dt>Area academica</dt>
+                        <dd>{submission.area}</dd>
+                      </div>
+                      <div>
+                        <dt>PNF o programa</dt>
+                        <dd>{submission.program}</dd>
+                      </div>
+                      <div>
+                        <dt>Institucion de procedencia</dt>
+                        <dd>{submission.school}</dd>
+                      </div>
+                      <div>
+                        <dt>Fecha de validacion</dt>
+                        <dd>{submission.createdAt}</dd>
+                      </div>
+                    </dl>
+                    <div>
+                      <strong>Documentos cargados</strong>
+                      {submission.uploadedDocuments.length > 0 ? (
+                        <ul>
+                          {submission.uploadedDocuments.map((document) => (
+                            <li key={document}>{document}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>No se detectaron documentos cargados.</p>
+                      )}
+                    </div>
+                  </aside>
+                ) : null}
+              </form>
+            ) : (
+              <div id="preregistration-panel" className="card preregistration-closed">
+                <p>
+                  El preregistro se encuentra oculto. Presiona el boton para desplegar el
+                  formulario completo con validaciones y carga de documentos.
+                </p>
               </div>
-            </section>
-
-            <section className="form-section">
-              <h3>Residencia y contacto</h3>
-              <div className="form-grid">
-                <SelectField
-                  label="Estado"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleInputChange}
-                  error={errors.state}
-                  options={stateOptions.map((value) => ({ value, label: value }))}
-                  placeholder="Selecciona el estado"
-                  required
-                />
-                <TextField
-                  label="Municipio"
-                  name="municipality"
-                  value={formData.municipality}
-                  onChange={handleInputChange}
-                  error={errors.municipality}
-                  required
-                  autoComplete="address-level2"
-                  placeholder="Municipio de residencia"
-                  maxLength={60}
-                />
-                <TextField
-                  label="Parroquia o sector"
-                  name="parish"
-                  value={formData.parish}
-                  onChange={handleInputChange}
-                  error={errors.parish}
-                  required
-                  autoComplete="address-level3"
-                  placeholder="Parroquia o sector"
-                  maxLength={60}
-                />
-                <TextField
-                  label="Direccion completa"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  error={errors.address}
-                  required
-                  autoComplete="street-address"
-                  placeholder="Calle, casa, referencia, urbanizacion"
-                  maxLength={160}
-                />
-              </div>
-            </section>
-
-            <section className="form-section">
-              <h3>Perfil academico</h3>
-              <div className="form-grid">
-                <SelectField
-                  label="Modalidad de ingreso"
-                  name="admissionModality"
-                  value={formData.admissionModality}
-                  onChange={handleInputChange}
-                  error={errors.admissionModality}
-                  options={admissionOptions}
-                  placeholder="Selecciona la modalidad"
-                  required
-                  helpText="La modalidad define documentos adicionales y el flujo de revision."
-                />
-                <SelectField
-                  label="Area academica de interes"
-                  name="careerArea"
-                  value={formData.careerArea}
-                  onChange={handleInputChange}
-                  error={errors.careerArea}
-                  options={careerAreaOptions}
-                  placeholder="Selecciona el area"
-                  required
-                />
-                <TextField
-                  label="Programa o PNF solicitado"
-                  name="pnfProgram"
-                  value={formData.pnfProgram}
-                  onChange={handleInputChange}
-                  error={errors.pnfProgram}
-                  required
-                  placeholder="Ej. Informatica, Enfermeria, Administracion"
-                  maxLength={80}
-                />
-                <TextField
-                  label="Institucion de procedencia"
-                  name="highSchoolName"
-                  value={formData.highSchoolName}
-                  onChange={handleInputChange}
-                  error={errors.highSchoolName}
-                  required
-                  placeholder="Nombre del liceo o escuela tecnica"
-                  maxLength={100}
-                />
-                <SelectField
-                  label="Tipo de institucion"
-                  name="highSchoolType"
-                  value={formData.highSchoolType}
-                  onChange={handleInputChange}
-                  error={errors.highSchoolType}
-                  options={highSchoolTypeOptions}
-                  placeholder="Selecciona el tipo"
-                  required
-                />
-                <TextField
-                  label="Ano de egreso"
-                  name="graduationYear"
-                  value={formData.graduationYear}
-                  onChange={handleInputChange}
-                  error={errors.graduationYear}
-                  required
-                  inputMode="numeric"
-                  placeholder={`${currentYear}`}
-                  maxLength={4}
-                />
-                <TextareaField
-                  label="Observaciones"
-                  name="observations"
-                  value={formData.observations}
-                  onChange={handleInputChange}
-                  error={errors.observations}
-                  helpText="Aporta informacion relevante: beca, discapacidad, traslado, equivalencia u otra situacion."
-                  placeholder="Escribe aqui cualquier observacion adicional..."
-                  maxLength={500}
-                />
-              </div>
-            </section>
-
-            <section className="form-section">
-              <h3>Carga de documentos</h3>
-              <p className="field-help">
-                Sube archivos legibles en PDF, JPG o PNG. Se aplican validaciones de peso,
-                formato y obligatoriedad segun la modalidad.
-              </p>
-              <div className="file-grid">
-                {documentFields.map((field) => (
-                  <FileField
-                    key={field.key}
-                    label={field.label}
-                    name={field.key}
-                    files={fileData[field.key]}
-                    onChange={handleFileChange}
-                    error={errors[field.key]}
-                    helpText={field.helpText}
-                    required={field.required || (field.key === 'opsuProof' && formData.admissionModality === 'opsu')}
-                    multiple={field.multiple}
-                  />
-                ))}
-              </div>
-            </section>
-
-            <section className="form-section">
-              <h3>Declaracion del aspirante</h3>
-              <div className="stack">
-                <CheckboxField
-                  label="Confirmo que la informacion suministrada es verdadera y verificable."
-                  name="agreeAccuracy"
-                  checked={formData.agreeAccuracy}
-                  onChange={handleInputChange}
-                  error={errors.agreeAccuracy}
-                  required
-                />
-                <CheckboxField
-                  label="Autorizo el uso de mis datos para fines academicos y administrativos del proceso de admision."
-                  name="agreeDataUse"
-                  checked={formData.agreeDataUse}
-                  onChange={handleInputChange}
-                  error={errors.agreeDataUse}
-                  helpText="Sin esta autorizacion no es posible avanzar con el preregistro."
-                  required
-                />
-              </div>
-            </section>
-
-            <div className="form-actions">
-              <button className="btn btn-primary" type="submit">
-                Validar preregistro
-              </button>
-              <button className="btn btn-secondary" type="reset">
-                Limpiar formulario
-              </button>
-            </div>
-
-            {submission ? (
-              <aside className="submission-summary" aria-live="polite">
-                <h3>Resumen local del preregistro</h3>
-                <dl>
-                  <div>
-                    <dt>Aspirante</dt>
-                    <dd>{submission.aspirantName}</dd>
-                  </div>
-                  <div>
-                    <dt>Documento</dt>
-                    <dd>{submission.documentId}</dd>
-                  </div>
-                  <div>
-                    <dt>Modalidad</dt>
-                    <dd>{submission.modality}</dd>
-                  </div>
-                  <div>
-                    <dt>Area academica</dt>
-                    <dd>{submission.area}</dd>
-                  </div>
-                  <div>
-                    <dt>PNF o programa</dt>
-                    <dd>{submission.program}</dd>
-                  </div>
-                  <div>
-                    <dt>Institucion de procedencia</dt>
-                    <dd>{submission.school}</dd>
-                  </div>
-                  <div>
-                    <dt>Fecha de validacion</dt>
-                    <dd>{submission.createdAt}</dd>
-                  </div>
-                </dl>
-                <div>
-                  <strong>Documentos cargados</strong>
-                  {submission.uploadedDocuments.length > 0 ? (
-                    <ul>
-                      {submission.uploadedDocuments.map((document) => (
-                        <li key={document}>{document}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>No se detectaron documentos cargados.</p>
-                  )}
-                </div>
-              </aside>
-            ) : null}
-          </form>
+            )}
+          </section>
         </div>
       </div>
     </section>

@@ -17,7 +17,7 @@ export default function Services() {
   const { content } = useSiteData()
 
   return (
-    <section className="section">
+    <section className="section services-page">
       <div className="container stack">
         <header className="page-header fade-in">
           <h1>Programas y servicios</h1>
@@ -52,7 +52,6 @@ export default function Services() {
               Actividades deportivas, culturales, recreativas y servicios de bienestar
               como el comedor universitario.
             </p>
-            <p>Backend objetivo: {content?.backendBase}</p>
           </article>
         </div>
       </div>

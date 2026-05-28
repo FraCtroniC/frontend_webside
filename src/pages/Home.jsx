@@ -36,8 +36,8 @@ export default function Home() {
           <div className="section-title">
             <h2>Informacion institucional destacada</h2>
             <p>
-              Website publica orientada a presentacion, captacion y acompanamiento de
-              nuevos ingresos, con acceso claro al sistema interno.
+              Informacion institucional, noticias y enlaces clave para la comunidad
+              universitaria.
             </p>
           </div>
 
@@ -59,7 +59,7 @@ export default function Home() {
         <div className="container stack">
           <div className="section-title">
             <h2>Noticias UPTNTMS</h2>
-            <p>Contenido de referencia tomado del sitio institucional oficial.</p>
+            <p>Actualizaciones, avisos y referencias institucionales vigentes.</p>
           </div>
 
           <div className="cards-grid">

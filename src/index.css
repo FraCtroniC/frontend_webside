@@ -288,12 +288,11 @@ h1 {
 .form-intro p,
 .form-help,
 .field-help,
-.field-error,
 .status-banner,
 .submission-summary,
 .submission-summary dd,
 .submission-summary p {
-  color: var(--color-muted);
+  color: #0d1b36;
 }
 
 .form-section {
@@ -306,6 +305,33 @@ h1 {
   margin-bottom: 0.9rem;
   color: var(--color-primary);
   font-size: 1.05rem;
+}
+
+.preregistration-wrap {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.preregistration-wrap .badge {
+  color: #0d1b36;
+}
+
+.preregistration-header {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.preregistration-toggle {
+  white-space: nowrap;
+}
+
+.preregistration-closed {
+  padding: 1.2rem;
+  text-align: center;
+  color: #0d1b36;
 }
 
 .form-grid {
@@ -422,6 +448,69 @@ h1 {
   border: 1px solid var(--color-border);
   padding: 0.65rem 0.8rem;
   font-size: 0.9rem;
+}
+
+.preregistration-wrap .field-label,
+.preregistration-wrap .checkbox-field label,
+.preregistration-wrap .submission-summary,
+.services-page .card,
+.services-page .card p,
+.services-page .card li,
+.contact-page .card,
+.contact-page .card p,
+.contact-page .card li {
+  color: #0d1b36;
+}
+
+.services-page .card ul,
+.admissions-page .card ul {
+  padding-left: 1.25rem;
+}
+
+.services-page .card li::marker,
+.admissions-page .card li::marker {
+  color: var(--color-accent);
+  font-weight: 900;
+}
+
+.services-page .card h3,
+.contact-page .card h3,
+.admissions-page .card h3 {
+  color: var(--color-primary);
+}
+
+.services-page .card p,
+.services-page .card li,
+.admissions-page .card p,
+.admissions-page .card li,
+.contact-page .card p,
+.contact-page .card li {
+  color: #0d1b36;
+}
+
+.services-page .card ul,
+.contact-page .card ul,
+.admissions-page .card ul {
+  margin: 0.75rem 0 0;
+}
+
+.services-page .card ul li,
+.contact-page .card ul li,
+.admissions-page .card ul li {
+  margin-bottom: 0.45rem;
+}
+
+.preregistration-wrap .form-intro p,
+.preregistration-wrap .field-help,
+.preregistration-wrap .submission-summary p,
+.preregistration-wrap .submission-summary dd,
+.preregistration-wrap .submission-summary li {
+  color: #0d1b36;
+}
+
+.preregistration-wrap .status-banner--success,
+.preregistration-wrap .status-banner--error {
+  color: #0d1b36;
 }
 
 .checkbox-field {

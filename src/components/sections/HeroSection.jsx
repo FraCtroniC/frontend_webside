@@ -17,7 +17,7 @@ export default function HeroSection({ hero }) {
         </div>
 
         <aside className="hero-card fade-in" aria-label="Indicadores de servicio">
-          <h3>Complejo educativo virtual</h3>
+          <h3>Pagina principal</h3>
           <p>
             Plataforma tecnologica para potenciar el aprendizaje, la comunicacion
             institucional y el acceso organizado a servicios universitarios.
@@ -25,7 +25,7 @@ export default function HeroSection({ hero }) {
 
           <div className="kpi-grid">
             <article className="kpi">
-              <strong>4</strong>
+              <strong>2</strong>
               <span>Sedes activas</span>
             </article>
             <article className="kpi">

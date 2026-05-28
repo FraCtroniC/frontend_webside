@@ -4,7 +4,7 @@ export default function Contact() {
   const usefulLinks = ['Historia de la UPTNTMS', 'Mision y vision']
 
   return (
-    <section className="section">
+    <section className="section contact-page">
       <div className="container stack">
         <header className="page-header fade-in">
           <h1>Contacto y soporte</h1>
@@ -33,15 +33,6 @@ export default function Contact() {
                 </li>
               ))}
             </ul>
-          </article>
-
-          <article className="card fade-in">
-            <h3>Acceso al sistema</h3>
-            <p>
-              El inicio de sesion y la recuperacion de credenciales se gestionan en el
-              portal interno SGUMS.
-            </p>
-            <AppLink href="/login">Ir al portal interno</AppLink>
           </article>
         </div>
       </div>
