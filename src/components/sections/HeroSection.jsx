@@ -10,9 +10,6 @@ export default function HeroSection({ hero }) {
           <p className="lead">{hero.description}</p>
 
           <div className="actions">
-            <AppLink href={hero.ctaPrimaryHref} className="btn btn-primary">
-              {hero.ctaPrimaryLabel}
-            </AppLink>
             <AppLink href={hero.ctaSecondaryHref} className="btn btn-ghost">
               {hero.ctaSecondaryLabel}
             </AppLink>

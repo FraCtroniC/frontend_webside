@@ -1,8 +1,4 @@
-import { useSiteData } from '../hooks/useSiteData'
-
 export default function About() {
-  const { content } = useSiteData()
-
   return (
     <section className="section">
       <div className="container stack">
@@ -41,16 +37,31 @@ export default function About() {
           </article>
         </div>
 
-        <article className="card fade-in">
-          <h3>Fuente de contenido</h3>
-          <p>
-            El contenido institucional de esta website se construye tomando como base
-            el sitio oficial para evitar informacion inventada.
-          </p>
-          <a href={content?.source} target="_blank" rel="noreferrer">
-            Ver fuente oficial
-          </a>
-        </article>
+        <div className="cards-grid">
+          <article className="card fade-in">
+            <h3>Historia</h3>
+            <p>
+              Aqui se presentara la trayectoria de la UPTNTMS, su origen y la
+              evolucion de su presencia academica en la region.
+            </p>
+          </article>
+
+          <article className="card fade-in">
+            <h3>Mision</h3>
+            <p>
+              Aqui se explicara el proposito institucional, la formacion integral y el
+              compromiso con la comunidad universitaria.
+            </p>
+          </article>
+
+          <article className="card fade-in">
+            <h3>Vision</h3>
+            <p>
+              Aqui se mostrara el rumbo deseado para la universidad y sus objetivos de
+              desarrollo academico, tecnologico y territorial.
+            </p>
+          </article>
+        </div>
       </div>
     </section>
   )

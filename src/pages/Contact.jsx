@@ -1,8 +1,7 @@
 import AppLink from '../components/ui/AppLink'
-import { useSiteData } from '../hooks/useSiteData'
 
 export default function Contact() {
-  const { content } = useSiteData()
+  const usefulLinks = ['Historia de la UPTNTMS', 'Mision y vision']
 
   return (
     <section className="section">
@@ -19,8 +18,8 @@ export default function Contact() {
           <article className="card fade-in">
             <h3>Correo institucional</h3>
             <p>
-              <AppLink href={`mailto:${content?.contact?.email}`} external>
-                {content?.contact?.email}
+              <AppLink href="mailto:uptntmanuelasaenz.ce@gmail.com" external>
+                uptntmanuelasaenz.ce@gmail.com
               </AppLink>
             </p>
           </article>
@@ -28,11 +27,9 @@ export default function Contact() {
           <article className="card fade-in">
             <h3>Enlaces utiles</h3>
             <ul>
-              {content?.contact?.usefulLinks?.map((item) => (
-                <li key={item.href}>
-                  <AppLink href={item.href} external>
-                    {item.title}
-                  </AppLink>
+              {usefulLinks.map((item) => (
+                <li key={item}>
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>

@@ -17,18 +17,13 @@ export default function SiteFooter() {
             <h3>Enlaces utiles</h3>
             <ul>
               <li>
-                <AppLink href="https://www.uptntmanuelasaenz-lafria.com.ve/historia.html" external>
+                <AppLink href="/about">
                   Historia de la UPTNTMS
                 </AppLink>
               </li>
               <li>
-                <AppLink href="https://www.uptntmanuelasaenz-lafria.com.ve/mision.html" external>
+                <AppLink href="/about">
                   Mision y vision
-                </AppLink>
-              </li>
-              <li>
-                <AppLink href="https://www.uptntmanuelasaenz-lafria.com.ve/organigrama.html" external>
-                  Organigrama universitario
                 </AppLink>
               </li>
             </ul>

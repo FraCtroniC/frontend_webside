@@ -50,7 +50,7 @@ const fallbackContent = {
     {
       title: 'Nota informativa - Agosto 2025',
       body: 'Actualizaciones academicas sobre curso intensivo y transformacion educativa universitaria.',
-      href: 'https://www.uptntmanuelasaenz-lafria.com.ve/index-2.html#upt',
+      href: '/admissions',
       linkLabel: 'Leer nota',
     },
   ],
@@ -59,19 +59,11 @@ const fallbackContent = {
     usefulLinks: [
       {
         title: 'Historia de la UPTNTMS',
-        href: 'https://www.uptntmanuelasaenz-lafria.com.ve/historia.html',
+        href: '/about',
       },
       {
         title: 'Mision y vision',
-        href: 'https://www.uptntmanuelasaenz-lafria.com.ve/mision.html',
-      },
-      {
-        title: 'Organigrama universitario',
-        href: 'https://www.uptntmanuelasaenz-lafria.com.ve/organigrama.html',
-      },
-      {
-        title: 'Autoridades',
-        href: 'https://www.uptntmanuelasaenz-lafria.com.ve/autoridades.html',
+        href: '/about',
       },
     ],
   },
@@ -80,13 +72,19 @@ const fallbackContent = {
       'Proceso de inscripcion de nuevo ingreso para asignados OPSU y no asignados, segun periodos informados por la universidad.',
     requirements: [
       'Original y copia de la planilla de inscripcion.',
+      'Planilla de preregistro o formulario de preinscripcion completo.',
+      'Copia legible de la cedula de identidad o pasaporte.',
       'Dos fotografias tipo carnet.',
       'Copia de la cedula de identidad ampliada y centrada.',
       'Original y copia de partida de nacimiento.',
+      'Copia del titulo de bachiller o fondo negro del titulo segun el proceso publicado.',
       'Original y copia de notas certificadas.',
       'Original de constancia de buena conducta.',
       'Original de comprobante RUSNIES (OPSU).',
+      'Constancia o planilla de asignacion OPSU cuando aplique.',
+      'Constancia de estudios, programa analitico o equivalencias para traslado o reingreso.',
       'Original de certificado de salud para PNF aplicables.',
+      'Soportes adicionales solicitados por la carrera o por el periodo academico vigente.',
     ],
   },
 }
@@ -94,7 +92,6 @@ const fallbackContent = {
 export async function getPublicContent() {
   return {
     ...fallbackContent,
-    source: 'https://www.uptntmanuelasaenz-lafria.com.ve/index-2.html#upt',
     backendBase: apiConfig.baseURL,
   }
 }

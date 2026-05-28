@@ -33,7 +33,11 @@ export default function PublicNavbar() {
               {item.label}
             </AppLink>
           ))}
-          <AppLink href="/login" className="btn btn-primary" style={{ padding: '0.45rem 1rem' }}>
+          <AppLink
+            href="/login"
+            className="btn btn-primary"
+            style={{ padding: '0.45rem 1rem', color: '#000' }}
+          >
             Entrar al portal
           </AppLink>
         </nav>
