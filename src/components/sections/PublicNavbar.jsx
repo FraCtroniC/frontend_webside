@@ -1,5 +1,6 @@
 import { useCurrentPath } from '../../hooks/useCurrentPath'
 import AppLink from '../ui/AppLink'
+import universityLogo from '../../assets/logo.png'
 
 const menu = [
   { href: '/', label: 'Inicio' },
@@ -16,7 +17,7 @@ export default function PublicNavbar() {
     <header className="site-header">
       <div className="container">
         <AppLink href="/" className="brand" aria-label="Ir al inicio">
-          <span className="brand-mark">SG</span>
+          <img className="brand-mark" src={universityLogo} alt="Logo de la universidad" />
           <span>
             <strong>SGUMS</strong>
             <small>UPTNTMS - Website Publica</small>
