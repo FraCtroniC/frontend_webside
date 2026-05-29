@@ -59,11 +59,15 @@ const fallbackContent = {
     usefulLinks: [
       {
         title: 'Historia de la UPTNTMS',
-        href: '/about',
+        href: '/about#history',
       },
       {
         title: 'Mision y vision',
-        href: '/about',
+        href: '/about#mission',
+      },
+      {
+        title: 'Proyeccion institucional',
+        href: '/about#vision',
       },
     ],
   },

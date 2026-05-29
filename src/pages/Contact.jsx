@@ -1,7 +1,11 @@
 import AppLink from '../components/ui/AppLink'
 
 export default function Contact() {
-  const usefulLinks = ['Historia de la UPTNTMS', 'Mision y vision']
+  const usefulLinks = [
+    { label: 'Historia de la UPTNTMS', href: '/about#history' },
+    { label: 'Mision y vision', href: '/about#mission' },
+    { label: 'Proyeccion institucional', href: '/about#vision' },
+  ]
 
   return (
     <section className="section contact-page">
@@ -28,8 +32,8 @@ export default function Contact() {
             <h3>Enlaces utiles</h3>
             <ul>
               {usefulLinks.map((item) => (
-                <li key={item}>
-                  <span>{item}</span>
+                <li key={item.href}>
+                  <AppLink href={item.href}>{item.label}</AppLink>
                 </li>
               ))}
             </ul>

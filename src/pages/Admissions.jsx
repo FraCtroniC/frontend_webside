@@ -123,6 +123,18 @@ const namePattern = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$/
 const idPattern = /^\d{6,10}$/
 const phonePattern = /^\d{10,11}$/
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const alphaInputPattern = /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g
+
+const alphaOnlyFields = new Set([
+  'firstName',
+  'middleName',
+  'firstSurname',
+  'secondSurname',
+  'municipality',
+  'parish',
+])
+
+const digitOnlyFields = new Set(['idNumber', 'phone', 'graduationYear'])
 
 function createInitialFormState() {
   return {
@@ -175,6 +187,88 @@ function formatFileSize(sizeInBytes) {
 
 function getFieldId(name) {
   return `preregister-${name}`
+}
+
+function getInputRestriction(name) {
+  if (alphaOnlyFields.has(name)) {
+    return 'letters'
+  }
+
+  if (digitOnlyFields.has(name)) {
+    return 'digits'
+  }
+
+  return null
+}
+
+function sanitizeInputValue(value, restriction) {
+  if (restriction === 'letters') {
+    return value.replace(alphaInputPattern, '')
+  }
+
+  if (restriction === 'digits') {
+    return value.replace(/\D/g, '')
+  }
+
+  return value
+}
+
+function shouldBlockInputCharacter(data, restriction) {
+  if (!data || data.length !== 1) {
+    return false
+  }
+
+  if (restriction === 'letters') {
+    return alphaInputPattern.test(data)
+  }
+
+  if (restriction === 'digits') {
+    return /\D/.test(data)
+  }
+
+  return false
+}
+
+function focusFirstInvalidField(errors) {
+  const fieldOrder = [
+    'firstName',
+    'middleName',
+    'firstSurname',
+    'secondSurname',
+    'nationality',
+    'idType',
+    'idNumber',
+    'birthDate',
+    'email',
+    'phone',
+    'state',
+    'municipality',
+    'parish',
+    'address',
+    'admissionModality',
+    'careerArea',
+    'pnfProgram',
+    'highSchoolName',
+    'highSchoolType',
+    'graduationYear',
+    'observations',
+    ...documentFields.map((field) => field.key),
+    'agreeAccuracy',
+    'agreeDataUse',
+  ]
+
+  const firstInvalidField = fieldOrder.find((fieldName) => errors[fieldName])
+
+  if (!firstInvalidField) {
+    return
+  }
+
+  requestAnimationFrame(() => {
+    const target = document.getElementById(getFieldId(firstInvalidField))
+
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    target?.focus?.({ preventScroll: true })
+  })
 }
 
 function validateFiles(fieldKey, files, formData) {
@@ -341,9 +435,33 @@ function TextField({
   placeholder,
   maxLength,
 }) {
+  const restriction = getInputRestriction(name)
   const describedBy = [helpText ? `${getFieldId(name)}-help` : null, error ? `${getFieldId(name)}-error` : null]
     .filter(Boolean)
     .join(' ')
+
+  const handleBeforeInput = (event) => {
+    if (shouldBlockInputCharacter(event.data, restriction)) {
+      event.preventDefault()
+    }
+  }
+
+  const handleChange = (event) => {
+    const sanitizedValue = sanitizeInputValue(event.target.value, restriction)
+
+    if (sanitizedValue === event.target.value) {
+      onChange(event)
+      return
+    }
+
+    onChange({
+      ...event,
+      target: {
+        ...event.target,
+        value: sanitizedValue,
+      },
+    })
+  }
 
   return (
     <label className={`field ${error ? 'field--error' : ''}`} htmlFor={getFieldId(name)}>
@@ -356,9 +474,11 @@ function TextField({
         name={name}
         type={type}
         value={value}
-        onChange={onChange}
+        onBeforeInput={handleBeforeInput}
+        onChange={handleChange}
         autoComplete={autoComplete}
-        inputMode={inputMode}
+        inputMode={inputMode ?? (restriction === 'digits' ? 'numeric' : 'text')}
+        pattern={restriction === 'digits' ? '[0-9]*' : undefined}
         placeholder={placeholder}
         maxLength={maxLength}
         aria-invalid={Boolean(error)}
@@ -586,6 +706,7 @@ export default function Admissions() {
     setErrors(nextErrors)
 
     if (Object.keys(nextErrors).length > 0) {
+      focusFirstInvalidField(nextErrors)
       setStatus({ type: 'error', message: 'Revisa los campos resaltados antes de continuar.' })
       setSubmission(null)
       return

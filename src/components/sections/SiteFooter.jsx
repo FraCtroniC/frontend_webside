@@ -17,13 +17,18 @@ export default function SiteFooter() {
             <h3>Enlaces utiles</h3>
             <ul>
               <li>
-                <AppLink href="/about">
+                <AppLink href="/about#history">
                   Historia de la UPTNTMS
                 </AppLink>
               </li>
               <li>
-                <AppLink href="/about">
+                <AppLink href="/about#mission">
                   Mision y vision
+                </AppLink>
+              </li>
+              <li>
+                <AppLink href="/about#vision">
+                  Proyeccion institucional
                 </AppLink>
               </li>
             </ul>
