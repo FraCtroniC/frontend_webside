@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.uptnt.local'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 const PORTAL_LOGIN_URL =
   import.meta.env.VITE_PORTAL_LOGIN_URL || 'http://localhost:5173/login'
 
@@ -15,4 +15,30 @@ export async function fetchFromApi(endpoint) {
   }
 
   return response.json()
+}
+
+export async function requestJson(endpoint, options = {}) {
+  const { headers: customHeaders, ...restOptions } = options
+  const response = await fetch(`${apiConfig.baseURL}${endpoint}`, {
+    ...restOptions,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(customHeaders ?? {}),
+    },
+  })
+
+  const contentType = response.headers.get('content-type') || ''
+  const payload = contentType.includes('application/json')
+    ? await response.json()
+    : await response.text()
+
+  if (!response.ok) {
+    const errorMessage =
+      payload && typeof payload === 'object' && payload.message
+        ? payload.message
+        : `Error HTTP ${response.status}`
+    throw new Error(errorMessage)
+  }
+
+  return payload
 }

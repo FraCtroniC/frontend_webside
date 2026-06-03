@@ -1,37 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AppLink from '../components/ui/AppLink'
 import { useSiteData } from '../hooks/useSiteData'
+import { requestJson } from '../services/api'
 
 const fileAccept = '.pdf,.jpg,.jpeg,.png'
 const maxFileSize = 6 * 1024 * 1024
 const currentYear = new Date().getFullYear()
-
-const stateOptions = [
-  'Amazonas',
-  'Anzoategui',
-  'Apure',
-  'Aragua',
-  'Barinas',
-  'Bolivar',
-  'Carabobo',
-  'Cojedes',
-  'Delta Amacuro',
-  'Distrito Capital',
-  'Falcon',
-  'Guarico',
-  'La Guaira',
-  'Lara',
-  'Merida',
-  'Miranda',
-  'Monagas',
-  'Nueva Esparta',
-  'Portuguesa',
-  'Sucre',
-  'Tachira',
-  'Trujillo',
-  'Yaracuy',
-  'Zulia',
-]
 
 const nationalityOptions = ['Venezolana', 'Extranjera', 'Doble nacionalidad']
 
@@ -154,6 +128,8 @@ function createInitialFormState() {
     address: '',
     admissionModality: '',
     careerArea: '',
+    careerId: '',
+    semesterId: '',
     pnfProgram: '',
     highSchoolName: '',
     highSchoolType: '',
@@ -247,6 +223,8 @@ function focusFirstInvalidField(errors) {
     'address',
     'admissionModality',
     'careerArea',
+    'careerId',
+    'semesterId',
     'pnfProgram',
     'highSchoolName',
     'highSchoolType',
@@ -278,12 +256,8 @@ function validateFiles(fieldKey, files, formData) {
     return ''
   }
 
-  if (field.required && files.length === 0) {
-    return 'Este documento es obligatorio para continuar.'
-  }
-
-  if (field.key === 'opsuProof' && formData.admissionModality === 'opsu' && files.length === 0) {
-    return 'La planilla o constancia OPSU es obligatoria para esta modalidad.'
+  if (files.length === 0) {
+    return ''
   }
 
   if (files.some((file) => file.size > maxFileSize)) {
@@ -362,11 +336,11 @@ function validateForm(formData, fileData) {
     errors.state = 'Selecciona el estado de residencia.'
   }
 
-  if (trimmedMunicipality.length < 3) {
+  if (!formData.municipality) {
     errors.municipality = 'Indica el municipio de residencia.'
   }
 
-  if (trimmedParish.length < 3) {
+  if (!formData.parish) {
     errors.parish = 'Indica la parroquia o sector.'
   }
 
@@ -663,12 +637,152 @@ export default function Admissions() {
   const [status, setStatus] = useState(null)
   const [submission, setSubmission] = useState(null)
   const [isPreregistrationOpen, setIsPreregistrationOpen] = useState(false)
+  const [catalogs, setCatalogs] = useState({
+    states: [],
+    municipalities: [],
+    parishes: [],
+    careers: [],
+    semesters: [],
+  })
+  const [catalogError, setCatalogError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadCatalogs() {
+      try {
+        const [states, careers, semesters] = await Promise.all([
+          requestJson('/states'),
+          requestJson('/careers'),
+          requestJson('/semesters'),
+        ])
+
+        if (cancelled) {
+          return
+        }
+
+        setCatalogs((current) => ({
+          ...current,
+          states,
+          careers,
+          semesters,
+        }))
+        setCatalogError('')
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
+
+        setCatalogError('No se pudieron cargar los catalogos institucionales. Intenta recargar la pagina.')
+      }
+    }
+
+    loadCatalogs()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    if (!formData.state) {
+      setCatalogs((current) => ({
+        ...current,
+        municipalities: [],
+        parishes: [],
+      }))
+      return undefined
+    }
+
+    async function loadMunicipalities() {
+      try {
+        const municipalities = await requestJson(`/municipalities?id_state=${formData.state}`)
+
+        if (cancelled) {
+          return
+        }
+
+        setCatalogs((current) => ({
+          ...current,
+          municipalities,
+          parishes: [],
+        }))
+        setCatalogError('')
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
+
+        setCatalogs((current) => ({
+          ...current,
+          municipalities: [],
+          parishes: [],
+        }))
+        setCatalogError('No se pudieron cargar los municipios del estado seleccionado.')
+      }
+    }
+
+    loadMunicipalities()
+
+    return () => {
+      cancelled = true
+    }
+  }, [formData.state])
+
+  useEffect(() => {
+    let cancelled = false
+
+    if (!formData.municipality) {
+      setCatalogs((current) => ({
+        ...current,
+        parishes: [],
+      }))
+      return undefined
+    }
+
+    async function loadParishes() {
+      try {
+        const parishes = await requestJson(`/parishes?id_municipality=${formData.municipality}`)
+
+        if (cancelled) {
+          return
+        }
+
+        setCatalogs((current) => ({
+          ...current,
+          parishes,
+        }))
+        setCatalogError('')
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
+
+        setCatalogs((current) => ({
+          ...current,
+          parishes: [],
+        }))
+        setCatalogError('No se pudieron cargar las parroquias del municipio seleccionado.')
+      }
+    }
+
+    loadParishes()
+
+    return () => {
+      cancelled = true
+    }
+  }, [formData.municipality])
 
   const handleInputChange = (event) => {
     const { name, type, value, checked } = event.target
 
     setFormData((current) => ({
       ...current,
+      ...(name === 'state' ? { municipality: '', parish: '' } : {}),
+      ...(name === 'municipality' ? { parish: '' } : {}),
       [name]: type === 'checkbox' ? checked : value,
     }))
 
@@ -698,7 +812,7 @@ export default function Admissions() {
     setIsPreregistrationOpen((current) => !current)
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     const nextErrors = validateForm(formData, fileData)
@@ -724,28 +838,97 @@ export default function Admissions() {
 
     const selectedModality = admissionOptions.find((item) => item.value === formData.admissionModality)?.label ?? 'No definido'
     const selectedArea = careerAreaOptions.find((item) => item.value === formData.careerArea)?.label ?? 'No definido'
+    const selectedCareer = catalogs.careers.find((item) => String(item.id_career) === formData.careerId)
+    const selectedSemester = catalogs.semesters.find((item) => String(item.id_semester) === formData.semesterId)
+    const selectedState = catalogs.states.find((item) => String(item.id_state) === formData.state)
+    const selectedMunicipality = catalogs.municipalities.find((item) => String(item.id_municipality) === formData.municipality)
+    const selectedParish = catalogs.parishes.find((item) => String(item.id_parish) === formData.parish)
+    const selectedHighSchoolType = highSchoolTypeOptions.find((item) => item.value === formData.highSchoolType)?.label ?? formData.highSchoolType
     const uploadedDocuments = documentFields
       .filter((field) => fileData[field.key].length > 0)
       .map((field) => `${field.label}: ${fileData[field.key].length} archivo(s)`)
 
-    setStatus({
-      type: 'success',
-      message:
-        'Validacion local completada. Este preregistro todavia no se envia a base de datos, pero ya quedo estructurado para integracion posterior.',
-    })
-    setSubmission({
-      aspirantName,
-      documentId: `${formData.idType}-${formData.idNumber.trim()}`,
-      modality: selectedModality,
-      area: selectedArea,
-      program: formData.pnfProgram.trim(),
-      school: formData.highSchoolName.trim(),
-      createdAt: new Date().toLocaleString('es-VE', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      }),
-      uploadedDocuments,
-    })
+    const observations = [
+      formData.observations.trim(),
+      formData.pnfProgram.trim() ? `PNF solicitado: ${formData.pnfProgram.trim()}` : '',
+      uploadedDocuments.length > 0 ? `Documentos cargados: ${uploadedDocuments.join(', ')}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n')
+
+    const payload = {
+      first_name: formData.firstName.trim(),
+      second_name: formData.middleName.trim() || undefined,
+      first_lastname: formData.firstSurname.trim(),
+      second_lastname: formData.secondSurname.trim() || undefined,
+      nationality: formData.nationality,
+      document_type: formData.idType,
+      document_id: formData.idNumber.trim(),
+      birth_date: formData.birthDate,
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      id_state: Number(formData.state),
+      id_municipality: Number(formData.municipality),
+      id_parish: Number(formData.parish),
+      full_address: formData.address.trim(),
+      entry_mode: selectedModality,
+      academic_area: selectedArea,
+      id_career: Number(formData.careerId),
+      id_semester: formData.semesterId ? Number(formData.semesterId) : undefined,
+      inst_procedencia: formData.highSchoolName.trim(),
+      inst_type: selectedHighSchoolType,
+      grad_year: Number(formData.graduationYear),
+      observations,
+      status_pre: 'Pendiente',
+      confirmo_info: formData.agreeAccuracy,
+      autorizo_datos: formData.agreeDataUse,
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const savedPreRegistration = await requestJson('/pre-registrations', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+
+      setStatus({
+        type: 'success',
+        message: 'Pre-registro guardado correctamente en el backend.',
+      })
+      setSubmission({
+        recordId: savedPreRegistration?.id_pre ?? 'N/A',
+        aspirantName,
+        documentId: `${formData.idType}-${formData.idNumber.trim()}`,
+        modality: selectedModality,
+        area: selectedArea,
+        career: selectedCareer?.name_career ?? 'No definido',
+        semester: selectedSemester?.number_semester ?? 'No definido',
+        state: selectedState?.name_state ?? 'No definido',
+        municipality: selectedMunicipality?.name_municipality ?? 'No definido',
+        parish: selectedParish?.name_parish ?? 'No definido',
+        program: formData.pnfProgram.trim(),
+        school: formData.highSchoolName.trim(),
+        createdAt: savedPreRegistration?.created_at
+          ? new Date(savedPreRegistration.created_at).toLocaleString('es-VE', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            })
+          : new Date().toLocaleString('es-VE', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }),
+        uploadedDocuments,
+      })
+    } catch (error) {
+      setStatus({
+        type: 'error',
+        message: error.message || 'No se pudo guardar el pre-registro.',
+      })
+      setSubmission(null)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const requirements = content?.admissions?.requirements ?? []
@@ -810,6 +993,7 @@ export default function Admissions() {
             {isPreregistrationOpen ? (
               <form id="preregistration-panel" className="card form-shell fade-in" onSubmit={handleSubmit} onReset={handleReset} noValidate>
                 {status ? <div className={`status-banner status-banner--${status.type}`}>{status.message}</div> : null}
+                {catalogError ? <div className="status-banner status-banner--error">{catalogError}</div> : null}
 
                 <section className="form-section">
                   <h3>Datos personales</h3>
@@ -946,31 +1130,29 @@ export default function Admissions() {
                       value={formData.state}
                       onChange={handleInputChange}
                       error={errors.state}
-                      options={stateOptions.map((value) => ({ value, label: value }))}
+                      options={catalogs.states.map((item) => ({ value: String(item.id_state), label: item.name_state }))}
                       placeholder="Selecciona el estado"
                       required
                     />
-                    <TextField
+                    <SelectField
                       label="Municipio"
                       name="municipality"
                       value={formData.municipality}
                       onChange={handleInputChange}
                       error={errors.municipality}
+                      options={catalogs.municipalities.map((item) => ({ value: String(item.id_municipality), label: item.name_municipality }))}
+                      placeholder={formData.state ? 'Selecciona el municipio' : 'Primero selecciona el estado'}
                       required
-                      autoComplete="address-level2"
-                      placeholder="Municipio de residencia"
-                      maxLength={60}
                     />
-                    <TextField
+                    <SelectField
                       label="Parroquia o sector"
                       name="parish"
                       value={formData.parish}
                       onChange={handleInputChange}
                       error={errors.parish}
+                      options={catalogs.parishes.map((item) => ({ value: String(item.id_parish), label: item.name_parish }))}
+                      placeholder={formData.municipality ? 'Selecciona la parroquia' : 'Primero selecciona el municipio'}
                       required
-                      autoComplete="address-level3"
-                      placeholder="Parroquia o sector"
-                      maxLength={60}
                     />
                     <TextField
                       label="Direccion completa"
@@ -1009,6 +1191,27 @@ export default function Admissions() {
                       options={careerAreaOptions}
                       placeholder="Selecciona el area"
                       required
+                    />
+                    <SelectField
+                      label="Carrera"
+                      name="careerId"
+                      value={formData.careerId}
+                      onChange={handleInputChange}
+                      error={errors.careerId}
+                      options={catalogs.careers.map((item) => ({ value: String(item.id_career), label: item.name_career }))}
+                      placeholder="Selecciona la carrera"
+                      required
+                      helpText="Se toma del catalogo de carreras existente en el backend."
+                    />
+                    <SelectField
+                      label="Semestre de interes"
+                      name="semesterId"
+                      value={formData.semesterId}
+                      onChange={handleInputChange}
+                      error={errors.semesterId}
+                      options={catalogs.semesters.map((item) => ({ value: String(item.id_semester), label: String(item.number_semester) }))}
+                      placeholder="Selecciona el semestre"
+                      helpText="Si no eliges uno, el backend puede aplicar su valor por defecto."
                     />
                     <TextField
                       label="Programa o PNF solicitado"
@@ -1080,7 +1283,7 @@ export default function Admissions() {
                         onChange={handleFileChange}
                         error={errors[field.key]}
                         helpText={field.helpText}
-                        required={field.required || (field.key === 'opsuProof' && formData.admissionModality === 'opsu')}
+                        required={false}
                         multiple={field.multiple}
                       />
                     ))}
@@ -1111,8 +1314,8 @@ export default function Admissions() {
                 </section>
 
                 <div className="form-actions">
-                  <button className="btn btn-primary" type="submit">
-                    Validar preregistro
+                  <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Guardando preregistro...' : 'Guardar preregistro'}
                   </button>
                   <button className="btn btn-secondary" type="reset">
                     Limpiar formulario
@@ -1121,8 +1324,12 @@ export default function Admissions() {
 
                 {submission ? (
                   <aside className="submission-summary" aria-live="polite">
-                    <h3>Resumen local del preregistro</h3>
+                    <h3>Resumen del preregistro guardado</h3>
                     <dl>
+                      <div>
+                        <dt>Registro</dt>
+                        <dd>{submission.recordId}</dd>
+                      </div>
                       <div>
                         <dt>Aspirante</dt>
                         <dd>{submission.aspirantName}</dd>
@@ -1138,6 +1345,26 @@ export default function Admissions() {
                       <div>
                         <dt>Area academica</dt>
                         <dd>{submission.area}</dd>
+                      </div>
+                      <div>
+                        <dt>Carrera</dt>
+                        <dd>{submission.career}</dd>
+                      </div>
+                      <div>
+                        <dt>Semestre</dt>
+                        <dd>{submission.semester}</dd>
+                      </div>
+                      <div>
+                        <dt>Estado</dt>
+                        <dd>{submission.state}</dd>
+                      </div>
+                      <div>
+                        <dt>Municipio</dt>
+                        <dd>{submission.municipality}</dd>
+                      </div>
+                      <div>
+                        <dt>Parroquia</dt>
+                        <dd>{submission.parish}</dd>
                       </div>
                       <div>
                         <dt>PNF o programa</dt>
