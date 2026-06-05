@@ -89,7 +89,11 @@ a {
 
 .eyebrow--soft {
   background: rgba(255, 209, 10, 0.22);
-  color: #6a4e00;
+  color: #fff;
+}
+
+.about-shell p {
+  text-align: justify;
 }
 
 .about-intro-copy {
