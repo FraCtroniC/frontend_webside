@@ -894,10 +894,10 @@ export default function Admissions() {
 
       setStatus({
         type: 'success',
-        message: 'Pre-registro guardado correctamente en el backend.',
+        message: 'Pre-registro enviado correctamente.',
       })
       setSubmission({
-        recordId: savedPreRegistration?.id_pre ?? 'N/A',
+        recordId: savedPreRegistration?.verification_code ?? 'N/A',
         aspirantName,
         documentId: `${formData.idType}-${formData.idNumber.trim()}`,
         modality: selectedModality,
@@ -1201,7 +1201,6 @@ export default function Admissions() {
                       options={catalogs.careers.map((item) => ({ value: String(item.id_career), label: item.name_career }))}
                       placeholder="Selecciona la carrera"
                       required
-                      helpText="Se toma del catalogo de carreras existente en el backend."
                     />
                     <SelectField
                       label="Semestre de interes"
@@ -1211,7 +1210,6 @@ export default function Admissions() {
                       error={errors.semesterId}
                       options={catalogs.semesters.map((item) => ({ value: String(item.id_semester), label: String(item.number_semester) }))}
                       placeholder="Selecciona el semestre"
-                      helpText="Si no eliges uno, el backend puede aplicar su valor por defecto."
                     />
                     <TextField
                       label="Programa o PNF solicitado"
@@ -1327,7 +1325,7 @@ export default function Admissions() {
                     <h3>Resumen del preregistro guardado</h3>
                     <dl>
                       <div>
-                        <dt>Registro</dt>
+                        <dt>Código de pre-registro</dt>
                         <dd>{submission.recordId}</dd>
                       </div>
                       <div>
