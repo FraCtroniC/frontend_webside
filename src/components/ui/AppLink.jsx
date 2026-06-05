@@ -3,11 +3,12 @@ export default function AppLink({
   children,
   className = '',
   external = false,
+  onClick,
   ...rest
 }) {
   if (external) {
     return (
-      <a href={href} className={className} target="_blank" rel="noreferrer" {...rest}>
+      <a href={href} className={className} target="_blank" rel="noreferrer" onClick={onClick} {...rest}>
         {children}
       </a>
     )
@@ -19,6 +20,11 @@ export default function AppLink({
     }
 
     event.preventDefault()
+
+    if (onClick) {
+      onClick(event)
+    }
+
     window.history.pushState({}, '', href)
     window.dispatchEvent(new Event('site:navigate'))
 
