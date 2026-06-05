@@ -92,10 +92,6 @@ a {
   color: #fff;
 }
 
-.about-shell p {
-  text-align: justify;
-}
-
 .about-intro-copy {
   max-width: 70ch;
 }
@@ -1001,6 +997,18 @@ h1 {
   background: currentColor;
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
   transform-origin: center;
+}
+
+.site-header.menu-open .nav-toggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.site-header.menu-open .nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.site-header.menu-open .nav-toggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
 }
 
 .nav-panel-header {
