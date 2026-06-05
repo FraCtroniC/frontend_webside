@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import AppLink from '../components/ui/AppLink'
+import ReadMoreList from '../components/ui/ReadMoreList'
 import { useSiteData } from '../hooks/useSiteData'
 import { requestJson } from '../services/api'
 
@@ -955,16 +956,13 @@ export default function Admissions() {
 
             <article className="card fade-in">
               <h3>Requisitos de nuevo ingreso</h3>
-              <ul>
-                {requirements.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <p>
-                Para documentos oficiales, consulta la publicacion institucional y los
-                avisos vigentes.
-              </p>
-              <AppLink href="/admissions">Revisar avisos oficiales</AppLink>
+              <ReadMoreList items={requirements} initialVisible={4}>
+                <p>
+                  Para documentos oficiales, consulta la publicacion institucional y los
+                  avisos vigentes.
+                </p>
+                <AppLink href="/admissions">Revisar avisos oficiales</AppLink>
+              </ReadMoreList>
             </article>
           </div>
 
