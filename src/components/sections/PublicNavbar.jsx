@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useCurrentPath } from '../../hooks/useCurrentPath'
 import AppLink from '../ui/AppLink'
 import universityLogo from '../../assets/logo.png'
+import { fetchFromApi } from '../../services/api'
 
-const menu = [
+const baseMenu = [
   { href: '/', label: 'Inicio' },
   { href: '/about', label: 'Nosotros' },
   { href: '/services', label: 'Programas' },
@@ -14,6 +15,15 @@ const menu = [
 export default function PublicNavbar() {
   const path = useCurrentPath()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [enrollmentOpen, setEnrollmentOpen] = useState(false)
+
+  useEffect(() => {
+    fetchFromApi('/periods/active')
+      .then((period) => setEnrollmentOpen(period?.enrollment_status === 'Abierta'))
+      .catch(() => setEnrollmentOpen(false))
+  }, [])
+
+  const menu = enrollmentOpen ? baseMenu : baseMenu.filter((item) => item.href !== '/admissions')
 
   useEffect(() => {
     setMenuOpen(false)
