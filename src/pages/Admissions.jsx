@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import AppLink from '../components/ui/AppLink'
 import ReadMoreList from '../components/ui/ReadMoreList'
 import { useSiteData } from '../hooks/useSiteData'
-import { requestJson } from '../services/api'
+import { requestJson, fetchFromApi } from '../services/api'
 
 const fileAccept = '.pdf,.jpg,.jpeg,.png'
 const maxFileSize = 6 * 1024 * 1024
@@ -638,6 +638,8 @@ export default function Admissions() {
   const [status, setStatus] = useState(null)
   const [submission, setSubmission] = useState(null)
   const [isPreregistrationOpen, setIsPreregistrationOpen] = useState(false)
+  const [enrollmentOpen, setEnrollmentOpen] = useState(false)
+  const [enrollmentLoading, setEnrollmentLoading] = useState(true)
   const [catalogs, setCatalogs] = useState({
     states: [],
     municipalities: [],
@@ -647,6 +649,13 @@ export default function Admissions() {
   })
   const [catalogError, setCatalogError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    fetchFromApi('/periods/active')
+      .then((period) => setEnrollmentOpen(period?.enrollment_status === 'Abierta'))
+      .catch(() => setEnrollmentOpen(false))
+      .finally(() => setEnrollmentLoading(false))
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -966,27 +975,34 @@ export default function Admissions() {
             </article>
           </div>
 
-          <section className="preregistration-wrap fade-in">
-            <div className="preregistration-header card">
-              <div className="form-intro">
-                <span className="badge">Preinscripcion en linea</span>
-                <h2>Formulario de preregistro</h2>
-                <p>
-                  Completa este formulario con informacion exacta. Cada campo esta validado
-                  para reducir errores comunes en el proceso de admision.
-                </p>
+          {enrollmentLoading ? (
+            <section className="preregistration-wrap fade-in">
+              <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+                <p>Cargando informaci&oacute;n de inscripciones...</p>
               </div>
+            </section>
+          ) : enrollmentOpen ? (
+            <section className="preregistration-wrap fade-in">
+              <div className="preregistration-header card">
+                <div className="form-intro">
+                  <span className="badge">Preinscripcion en linea</span>
+                  <h2>Formulario de preregistro</h2>
+                  <p>
+                    Completa este formulario con informacion exacta. Cada campo esta validado
+                    para reducir errores comunes en el proceso de admision.
+                  </p>
+                </div>
 
-              <button
-                className="btn btn-primary preregistration-toggle"
-                type="button"
-                onClick={togglePreregistration}
-                aria-expanded={isPreregistrationOpen}
-                aria-controls="preregistration-panel"
-              >
-                {isPreregistrationOpen ? 'Ocultar preregistro' : 'Abrir preregistro'}
-              </button>
-            </div>
+                <button
+                  className="btn btn-primary preregistration-toggle"
+                  type="button"
+                  onClick={togglePreregistration}
+                  aria-expanded={isPreregistrationOpen}
+                  aria-controls="preregistration-panel"
+                >
+                  {isPreregistrationOpen ? 'Ocultar preregistro' : 'Abrir preregistro'}
+                </button>
+              </div>
 
             {isPreregistrationOpen ? (
               <form id="preregistration-panel" className="card form-shell fade-in" onSubmit={handleSubmit} onReset={handleReset} noValidate>
@@ -1398,7 +1414,16 @@ export default function Admissions() {
                 </p>
               </div>
             )}
-          </section>
+            </section>
+          ) : (
+            <section className="preregistration-wrap fade-in">
+              <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+                <span className="badge" style={{ marginBottom: '1rem', display: 'inline-block' }}>Inscripciones cerradas</span>
+                <h2>Matr&iacute;cula no disponible</h2>
+                <p>Actualmente las inscripciones no est&aacute;n abiertas. Vuelve a consultar cuando se active el per&iacute;odo de admisi&oacute;n.</p>
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </section>
