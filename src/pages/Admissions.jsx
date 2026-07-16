@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import AppLink from '../components/ui/AppLink'
 import ReadMoreList from '../components/ui/ReadMoreList'
 import { useSiteData } from '../hooks/useSiteData'
-import { requestJson, fetchFromApi } from '../services/api'
+import { requestJson, fetchFromApi, apiConfig } from '../services/api'
 
-const fileAccept = '.pdf,.jpg,.jpeg,.png'
+const fileAccept = '.jpg,.jpeg,.png'
 const maxFileSize = 6 * 1024 * 1024
 const currentYear = new Date().getFullYear()
 
@@ -41,56 +41,21 @@ const documentFields = [
     label: 'Titulo de bachiller',
     required: true,
     multiple: false,
-    helpText: 'Adjunta una copia legible en PDF o imagen.',
+    helpText: 'Adjunta una imagen legible (JPG/PNG).',
   },
   {
     key: 'certifiedGrades',
     label: 'Notas certificadas',
     required: true,
     multiple: false,
-    helpText: 'Preferiblemente en un solo PDF con todas las paginas.',
+    helpText: 'Adjunta una imagen legible (JPG/PNG).',
   },
   {
     key: 'identityCard',
     label: 'Cedula de identidad o pasaporte',
     required: true,
     multiple: false,
-    helpText: 'Copia ampliada y completamente legible.',
-  },
-  {
-    key: 'birthCertificate',
-    label: 'Partida de nacimiento',
-    required: true,
-    multiple: false,
-    helpText: 'Debe coincidir con los datos del aspirante.',
-  },
-  {
-    key: 'photos',
-    label: 'Fotografias tipo carnet',
-    required: true,
-    multiple: true,
-    helpText: 'Carga 2 archivos o un PDF con las fotos escaneadas.',
-  },
-  {
-    key: 'opsuProof',
-    label: 'Constancia o planilla OPSU',
-    required: false,
-    multiple: false,
-    helpText: 'Obligatoria para aspirantes asignados por OPSU.',
-  },
-  {
-    key: 'medicalCertificate',
-    label: 'Certificado medico',
-    required: false,
-    multiple: false,
-    helpText: 'Solicitado en algunos programas o procesos institucionales.',
-  },
-  {
-    key: 'additionalDocs',
-    label: 'Documentos adicionales',
-    required: false,
-    multiple: true,
-    helpText: 'Constancia de estudios, programa analitico, equivalencias o soportes extra.',
+    helpText: 'Copia ampliada y completamente legible (JPG/PNG).',
   },
 ]
 
@@ -265,12 +230,8 @@ function validateFiles(fieldKey, files, formData) {
     return 'Cada archivo debe pesar menos de 6 MB.'
   }
 
-  if (files.some((file) => !['application/pdf', 'image/jpeg', 'image/png'].includes(file.type))) {
-    return 'Solo se aceptan archivos PDF o imagen JPG/PNG.'
-  }
-
-  if (field.key === 'photos' && files.length > 2) {
-    return 'Carga como maximo 2 fotografias carnet.'
+  if (files.some((file) => !['image/jpeg', 'image/png'].includes(file.type))) {
+    return 'Solo se aceptan imagenes en formato JPG o PNG.'
   }
 
   return ''
@@ -586,47 +547,132 @@ function CheckboxField({ label, name, checked, onChange, error, helpText, requir
 }
 
 function FileField({ label, name, files, onChange, error, helpText, required = false, multiple = false }) {
+  const [previews, setPreviews] = useState([])
+  const [previewIndex, setPreviewIndex] = useState(null)
+
+  useEffect(() => {
+    const urls = files.map((file) => URL.createObjectURL(file))
+    setPreviews(urls)
+    return () => urls.forEach((url) => URL.revokeObjectURL(url))
+  }, [files])
+
   const describedBy = [helpText ? `${getFieldId(name)}-help` : null, error ? `${getFieldId(name)}-error` : null]
     .filter(Boolean)
     .join(' ')
 
   return (
-    <label className={`file-field ${error ? 'field--error' : ''}`} htmlFor={getFieldId(name)}>
-      <span className="field-label">
-        {label}
-        {required ? <span className="field-required" aria-hidden="true">*</span> : null}
-      </span>
-      <input
-        id={getFieldId(name)}
-        name={name}
-        type="file"
-        accept={fileAccept}
-        multiple={multiple}
-        onChange={onChange}
-        aria-invalid={Boolean(error)}
-        aria-describedby={describedBy || undefined}
-      />
+    <div className={`file-field ${error ? 'field--error' : ''}`}>
+      <label htmlFor={getFieldId(name)}>
+        <span className="field-label">
+          {label}
+          {required ? <span className="field-required" aria-hidden="true">*</span> : null}
+        </span>
+        <input
+          id={getFieldId(name)}
+          name={name}
+          type="file"
+          accept={fileAccept}
+          multiple={multiple}
+          onChange={onChange}
+          aria-invalid={Boolean(error)}
+          aria-describedby={describedBy || undefined}
+        />
+      </label>
       {helpText ? (
         <small id={`${getFieldId(name)}-help`} className="field-help">
           {helpText}
         </small>
       ) : null}
       {files.length > 0 ? (
-        <ul className="file-list" aria-label={`Archivos cargados para ${label}`}>
-          {files.map((file) => (
-            <li key={`${file.name}-${file.size}`}>
-              <span>{file.name}</span>
-              <span>{formatFileSize(file.size)}</span>
-            </li>
+        <div className="file-preview-grid" aria-label={`Archivos cargados para ${label}`}>
+          {files.map((file, index) => (
+            <div className="file-preview-card" key={`${file.name}-${file.size}`}>
+              <img
+                className="file-preview-img"
+                src={previews[index]}
+                alt={file.name}
+                loading="lazy"
+                onClick={() => setPreviewIndex(index)}
+                style={{ cursor: 'pointer' }}
+              />
+              <div className="file-preview-info">
+                <span className="file-preview-name" title={file.name}>{file.name}</span>
+                <span className="file-preview-size">{formatFileSize(file.size)}</span>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : null}
       {error ? (
         <small id={`${getFieldId(name)}-error`} className="field-error" role="alert">
           {error}
         </small>
       ) : null}
-    </label>
+
+      {previewIndex !== null && previews[previewIndex] && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'zoom-out',
+          }}
+          onClick={() => setPreviewIndex(null)}
+        >
+          <div
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '12px',
+            }}
+          >
+            <button
+              style={{
+                alignSelf: 'flex-end',
+                background: 'rgba(255,255,255,0.15)',
+                border: 'none',
+                color: '#fff',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                fontSize: 20,
+                fontWeight: 700,
+                backdropFilter: 'blur(4px)',
+              }}
+              onClick={() => setPreviewIndex(null)}
+            >
+              ✕
+            </button>
+            <div style={{ fontSize: '0.85rem', color: '#e2e8f0', fontWeight: 600, textAlign: 'center' }}>
+              {files[previewIndex]?.name}
+            </div>
+            <img
+              src={previews[previewIndex]}
+              alt={files[previewIndex]?.name}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '75vh',
+                objectFit: 'contain',
+                borderRadius: '12px',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -649,6 +695,7 @@ export default function Admissions() {
   })
   const [catalogError, setCatalogError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [documentUploading, setDocumentUploading] = useState(false)
 
   useEffect(() => {
     fetchFromApi('/periods/active')
@@ -902,9 +949,56 @@ export default function Admissions() {
         body: JSON.stringify(payload),
       })
 
+      const idPre = savedPreRegistration?.id_pre
+      let uploadSuccess = 0
+      let uploadErrors = []
+
+      if (idPre) {
+        setDocumentUploading(true)
+        setStatus({ type: 'info', message: 'Pre-registro guardado. Subiendo documentos...' })
+
+        for (const field of documentFields) {
+          const files = fileData[field.key]
+          if (!files || files.length === 0) continue
+
+          for (const file of files) {
+            try {
+              const formData = new FormData()
+              formData.append('file', file)
+              formData.append('id_pre', String(idPre))
+              formData.append('document_type', field.label)
+
+              const response = await fetch(`${apiConfig.baseURL}/pre-documents/upload`, {
+                method: 'POST',
+                body: formData,
+              })
+
+              if (!response.ok) {
+                const errData = await response.json().catch(() => ({}))
+                throw new Error(errData.message || `Error ${response.status}`)
+              }
+
+              uploadSuccess++
+            } catch (err) {
+              uploadErrors.push(`${field.label}: ${err.message}`)
+            }
+          }
+        }
+
+        setDocumentUploading(false)
+      }
+
+      const docMsg = uploadSuccess > 0
+        ? `${uploadSuccess} documento(s) subido(s) correctamente.`
+        : ''
+
+      const warnMsg = uploadErrors.length > 0
+        ? ` Errores: ${uploadErrors.join('; ')}`
+        : ''
+
       setStatus({
-        type: 'success',
-        message: 'Pre-registro enviado correctamente.',
+        type: uploadErrors.length > 0 ? 'warning' : 'success',
+        message: `Pre-registro enviado correctamente.${docMsg ? ' ' + docMsg : ''}${warnMsg}`,
       })
       setSubmission({
         recordId: savedPreRegistration?.verification_code ?? 'N/A',
@@ -938,6 +1032,7 @@ export default function Admissions() {
       setSubmission(null)
     } finally {
       setIsSubmitting(false)
+      setDocumentUploading(false)
     }
   }
 
@@ -956,7 +1051,7 @@ export default function Admissions() {
             <article className="card fade-in">
               <h3>Antes de iniciar el preregistro</h3>
               <ul>
-                <li>Ten a mano tus documentos escaneados en PDF, JPG o PNG.</li>
+                <li>Ten a mano tus documentos escaneados en imagen JPG o PNG.</li>
                 <li>Verifica nombres, cedula, correo y telefono antes de enviar.</li>
                 <li>Si eres asignado por OPSU, prepara tambien la constancia o planilla.</li>
                 <li>En equivalencias o traslado, adjunta soportes academicos adicionales.</li>
@@ -1282,7 +1377,7 @@ export default function Admissions() {
                 <section className="form-section">
                   <h3>Carga de documentos</h3>
                   <p className="field-help">
-                    Sube archivos legibles en PDF, JPG o PNG. Se aplican validaciones de peso,
+                    Sube imagenes legibles en formato JPG o PNG. Se aplican validaciones de peso,
                     formato y obligatoriedad segun la modalidad.
                   </p>
                   <div className="file-grid">
@@ -1326,8 +1421,8 @@ export default function Admissions() {
                 </section>
 
                 <div className="form-actions">
-                  <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Guardando preregistro...' : 'Guardar preregistro'}
+                  <button className="btn btn-primary" type="submit" disabled={isSubmitting || documentUploading}>
+                    {documentUploading ? 'Subiendo documentos...' : isSubmitting ? 'Guardando preregistro...' : 'Guardar preregistro'}
                   </button>
                   <button className="btn btn-secondary" type="reset">
                     Limpiar formulario
