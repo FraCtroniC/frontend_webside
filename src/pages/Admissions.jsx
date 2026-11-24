@@ -7,6 +7,16 @@ import { requestJson, fetchFromApi, apiConfig } from '../services/api'
 const fileAccept = '.jpg,.jpeg,.png'
 const maxFileSize = 6 * 1024 * 1024
 const currentYear = new Date().getFullYear()
+const minApplicantAge = 17
+
+function getMaxBirthDateForAge(minAge = minApplicantAge) {
+  const today = new Date()
+  today.setFullYear(today.getFullYear() - minAge)
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 const nationalityOptions = ['Venezolana', 'Extranjera', 'Doble nacionalidad']
 
@@ -252,20 +262,20 @@ function validateForm(formData, fileData) {
   const trimmedSchool = formData.highSchoolName.trim()
   const graduationYear = Number(formData.graduationYear)
 
-  if (trimmedFirstName.length < 2 || !namePattern.test(trimmedFirstName)) {
-    errors.firstName = 'Ingresa un nombre valido, sin numeros ni simbolos.'
+  if (trimmedFirstName.length < 2 || trimmedFirstName.length > 30 || !namePattern.test(trimmedFirstName)) {
+    errors.firstName = 'Ingresa un nombre valido (entre 2 y 30 letras, sin numeros ni simbolos).'
   }
 
-  if (trimmedMiddleName && !namePattern.test(trimmedMiddleName)) {
-    errors.middleName = 'Ingresa un segundo nombre valido.'
+  if (trimmedMiddleName && (trimmedMiddleName.length < 2 || trimmedMiddleName.length > 30 || !namePattern.test(trimmedMiddleName))) {
+    errors.middleName = 'Ingresa un segundo nombre valido (entre 2 y 30 letras).'
   }
 
-  if (trimmedFirstSurname.length < 2 || !namePattern.test(trimmedFirstSurname)) {
-    errors.firstSurname = 'Ingresa el primer apellido correctamente.'
+  if (trimmedFirstSurname.length < 2 || trimmedFirstSurname.length > 30 || !namePattern.test(trimmedFirstSurname)) {
+    errors.firstSurname = 'Ingresa el primer apellido correctamente (entre 2 y 30 letras).'
   }
 
-  if (trimmedSecondSurname && !namePattern.test(trimmedSecondSurname)) {
-    errors.secondSurname = 'Ingresa el segundo apellido correctamente.'
+  if (trimmedSecondSurname && (trimmedSecondSurname.length < 2 || trimmedSecondSurname.length > 30 || !namePattern.test(trimmedSecondSurname))) {
+    errors.secondSurname = 'Ingresa el segundo apellido correctamente (entre 2 y 30 letras).'
   }
 
   if (!formData.nationality) {
@@ -282,8 +292,27 @@ function validateForm(formData, fileData) {
 
   if (!formData.birthDate) {
     errors.birthDate = 'Indica la fecha de nacimiento.'
-  } else if (new Date(formData.birthDate) > new Date()) {
-    errors.birthDate = 'La fecha de nacimiento no puede estar en el futuro.'
+  } else {
+    const parts = formData.birthDate.split('-').map(Number)
+    const [birthYear, birthMonth, birthDay] = parts
+    const birthDateObj = new Date(birthYear, (birthMonth || 1) - 1, birthDay || 1)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n)) || birthYear < 1920) {
+      errors.birthDate = 'Ingresa una fecha de nacimiento valida.'
+    } else if (birthDateObj > today) {
+      errors.birthDate = 'La fecha de nacimiento no puede estar en el futuro.'
+    } else {
+      let age = today.getFullYear() - birthYear
+      const monthDiff = (today.getMonth() + 1) - birthMonth
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDay)) {
+        age--
+      }
+      if (age < minApplicantAge) {
+        errors.birthDate = `El aspirante debe tener al menos ${minApplicantAge} años de edad.`
+      }
+    }
   }
 
   if (!emailPattern.test(trimmedEmail)) {
@@ -370,6 +399,8 @@ function TextField({
   autoComplete,
   placeholder,
   maxLength,
+  min,
+  max,
 }) {
   const restriction = getInputRestriction(name)
   const describedBy = [helpText ? `${getFieldId(name)}-help` : null, error ? `${getFieldId(name)}-error` : null]
@@ -417,6 +448,8 @@ function TextField({
         pattern={restriction === 'digits' ? '[0-9]*' : undefined}
         placeholder={placeholder}
         maxLength={maxLength}
+        min={min}
+        max={max}
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy || undefined}
       />
@@ -619,9 +652,7 @@ function FileField({ label, name, files, onChange, error, helpText, required = f
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'zoom-out',
           }}
-          onClick={() => setPreviewIndex(null)}
         >
           <div
             style={{
@@ -1115,8 +1146,8 @@ export default function Admissions() {
                       error={errors.firstName}
                       required
                       autoComplete="given-name"
-                      placeholder="Ej. Maria"
-                      maxLength={40}
+                      placeholder="Ej. Maria (2–30 letras)"
+                      maxLength={30}
                     />
                     <TextField
                       label="Segundo nombre"
@@ -1125,8 +1156,8 @@ export default function Admissions() {
                       onChange={handleInputChange}
                       error={errors.middleName}
                       autoComplete="additional-name"
-                      placeholder="Opcional"
-                      maxLength={40}
+                      placeholder="Opcional (máx 30 letras)"
+                      maxLength={30}
                     />
                     <TextField
                       label="Primer apellido"
@@ -1136,8 +1167,8 @@ export default function Admissions() {
                       error={errors.firstSurname}
                       required
                       autoComplete="family-name"
-                      placeholder="Ej. Perez"
-                      maxLength={40}
+                      placeholder="Ej. Perez (2–30 letras)"
+                      maxLength={30}
                     />
                     <TextField
                       label="Segundo apellido"
@@ -1146,8 +1177,8 @@ export default function Admissions() {
                       onChange={handleInputChange}
                       error={errors.secondSurname}
                       autoComplete="family-name"
-                      placeholder="Opcional"
-                      maxLength={40}
+                      placeholder="Opcional (máx 30 letras)"
+                      maxLength={30}
                     />
                     <SelectField
                       label="Nacionalidad"
@@ -1202,6 +1233,8 @@ export default function Admissions() {
                       error={errors.birthDate}
                       required
                       type="date"
+                      min="1920-01-01"
+                      max={getMaxBirthDateForAge(minApplicantAge)}
                     />
                     <TextField
                       label="Correo electronico"
@@ -1213,7 +1246,7 @@ export default function Admissions() {
                       type="email"
                       autoComplete="email"
                       placeholder="nombre@correo.com"
-                      maxLength={120}
+                      maxLength={100}
                     />
                     <TextField
                       label="Telefono principal"
